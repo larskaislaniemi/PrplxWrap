@@ -1,0 +1,21 @@
+To compile the shared libraries, Windows/MinGW environment:
+
+# first modify meemum.f in PerpleX source: remove main program 
+
+set PATH=c:\MinGW\bin;%PATH%
+cd \Progs\perplex668
+mingw32-gfortran.exe -c meemum.f -o meemum.o
+cd ..\PrplxWrapWT
+mingw32-cc -c perplex.c -o perplex.o
+mingw32-cc -c Rperplex.c -o Rperplex.o -I\Progs\R-3.0.2\include
+
+# test program
+cd distexamples
+mingw32-cc -c gridding.c -o gridding.o
+mingw32-gfortran ..\..\perplex668\meemum.o ..\perplex.o gridding.o -o gridding.exe
+cd datfiles
+..\gridding.exe
+
+# linking the DLL:
+mingw32-gfortran -shared ..\perplex668\meemum.o perplex.o Rperplex.o -o libperplex.dll -lR -L\Progs\Rwin-3.0.2\bin\i386
+

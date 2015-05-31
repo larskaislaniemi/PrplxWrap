@@ -1,0 +1,55 @@
+CC=gcc
+RCC=gcc
+#PROFILEROPT=-pg
+PROFILEROPT=
+#MEX=/home/lars/Progs/MATLAB/R2014a/bin/mex
+MEX=/usr/local/bin/mex
+OPTDEF=-DUSE_LPOPT_WARM_START=1
+#OPTDEF=
+OPTIMIZATION=-g
+CFLAGS=-c -Wall $(OPTIMIZATION) -fPIC $(OPTDEF) $(PROFILEROPT)
+MFLAGS=-lgfortran
+LDFLAGS=-lgfortran $(OPTIMIZATION) $(PROFILEROPT)
+SOURCES=perplex.c 
+MSOURCES=m_ini_phaseq.c
+RINCLUDE=-I/opt/local/Library/Frameworks/R.framework/Resources/include
+RLIB=-L/opt/local/Library/Frameworks/R.framework/Resources/lib
+RSOURCES=Rperplex.c
+RCFLAGS=-I/usr/share/R/include -std=gnu99
+RLDFLAGS=$(RLIB) -lR
+OBJECTS=$(SOURCES:.c=.o)
+ROBJECTS=$(RSOURCES:.c=.o)
+RSHLIB=$(RSOURCES:.c=.so)
+SHLIB=libperplex.so
+PERPLEXSRC=../perplex668
+PERPLEXOBJECTS=$(PERPLEXSRC)/meemum.o
+#PERPLEXOBJECTS=
+EXECUTABLE=
+
+all: $(OBJECTS) $(ROBJECTS) $(SHLIB) $(RSHLIB)
+
+clean:
+	rm -f $(OBJECTS) $(ROBJECTS) $(RSHLIB) $(EXECUTABLE)
+
+Robj: $(RSOURCES) $(PERPLEXOBJECTS)
+	$(CC) $(CFLAGS) $(RCFLAGS) $(RINCLUDE) $(RSOURCES)
+
+obj: $(SOURCES) $(PERPLEXOBJECTS) 
+	$(CC) $(CFLAGS) $(SOURCES)
+
+shared: $(OBJECTS)
+	$(CC) $(OPTIMIZATION) -shared -o $(SHLIB) $(OBJECTS) $(PERPLEXOBJECTS) $(LDFLAGS) 
+
+Rshared: $(OBJECTS) $(ROBJECTS) $(PERPLEXOBJECTS)
+	$(RCC) -shared -o $(RSHLIB) $(ROBJECTS) $(OBJECTS) $(PERPLEXOBJECTS) $(LDFLAGS) $(RLDFLAGS)
+
+
+matlab: $(OBJECTS) $(PERPLEXOBJECTS) $(MSOURCES)
+	$(MEX) $(MFLAGS) $(MSOURCES) $(OBJECTS) $(PERPLEXOBJECTS)
+
+$(EXECUTABLE): $(OBJECTS) $(PERPLEXOBJECTS)
+	$(CC) $(LDFLAGS) $(OBJECTS) $(PERPLEXOBJECTS) -o $@
+
+	#.c.o:
+	#$(CC) $(CFLAGS) $< -o $@
+

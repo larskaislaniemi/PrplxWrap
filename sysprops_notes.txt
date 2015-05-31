@@ -1,0 +1,40 @@
+Values of sysprops:
+3.02    V(J/bar) molar prop and density
+-1126140.53 H(J) molar prop and density
+1.03    Gruneisen_T 
+1072807.04  Ks(bar)
+610612.05   Mu(bar)
+5.79    V0(km/s)
+7.67    Vp(km/s)
+4.36    Vs(km/s)
+1.76 = Vp/Vs
+3204.93 Density(kg/m3) molar prop and density
+-1528113.77
+125.72  Cp(J/K)
+0.00    Alpha(1/K)
+0.00    Beta(1/K)
+247.67  S(J/K) molar prop and density
+0.60
+96.88   N(g) molar prop and density
+-158.58
+-125.94
+3.85
+1.66
+-0.00
+-0.00
+-0.00
+0.00
+0.00
+0.00
+1.06    Cp/Cv
+5.79861712456
+
+
+other bulk properties:
+
+enthalpy = psys2 / psysy1 * 1d5 / psys10
+spec.enthalpy = psys2 / psys1 * 1d5
+entropy = psys(15)/psys(1)*1d5/psys(10),
+spec.entropy = psys(15)/psys(1)*1d5,
+cp = psys(12)/psys(1)*1d5/psys(10)
+specific cp = psys(12)/psys(1)*1d5

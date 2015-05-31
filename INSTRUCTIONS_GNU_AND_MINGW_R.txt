@@ -1,0 +1,117 @@
+Important files:
+
+- perplex.c: The C to PerpleX wrapper. See inside for comments and for some general notes on 
+  C-Fortran integration. --> Shared library libperplex.so
+
+- perplex.h: The header file the wrapper. See inside for comments. NB! Constants defined here
+  MUST HAVE same values as those in PerpleX source perplex_parameters.h. Constants are named
+  similarly to PerpleX naming, except that "p_" is added in front of the names. Extern structs
+  here correspond to Fortran common blocks. These MUST HAVE same internal structure (i.e. memory
+  has to be mapped similarly within each common bloc / external struct.
+
+- Rperplex.c: The R wrapper for the C wrapper [sic]. Functions defined here can be called from 
+  R, once loaded with dyn.load() within R. R variables are of type "SEXP" and are converted to
+  C data types whenever needed. --> Shared library Rperplex.so
+  
+- In addition, shared fortran library is needed (libgfortran.so in GNU C environment) and shared 
+  meemum library. (These can be produced from the meemum.o object file)
+
+  
+*** 
+
+Workflow in Linux (64-bit, GNU C / GNU Fortran compiler):
+
+To compile Perplex shared library
+- Unzip perplex668.zip (**, see Note 2)
+- Go into dir perplex668 and do "make meemum"
+- Do "gcc -shared meemum.o -o libmeemum.so -lgfortran"
+
+To compile PrplxWrapper shared library
+- Unzip PrplxWrapWT.zip
+- Go into dir PrplxWrapWT
+- Do "make obj", "make Robj", "make shared", "make Rshared"
+
+To test the C interface with the gridding.c program
+- Go into dir PrplxWrapWT/distexamples
+- Do "make"
+- Set the environment variable to tell where the shared libraries are (in bash: 
+  "export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/path/to/perplex_src:/path_to_perplexwrap_src")
+- Change dir to PrplxWrapWT/distexamples/datfiles
+- Run "../gridding" (outputs to output.csv)
+
+To use the R interface
+- Go into dir PrplxWrapWT/distexamples/datfiles
+- Start R
+- To load all libraries do  
+   > dyn.load("/usr/lib/gcc/x86_64-linux-gnu/4.7/libgfortran.so", now=T, local=F);
+   > dyn.load("../../../perplex668/libmeemum.so", now=T, local=F);
+   > dyn.load("../../libperplex.so", now=T, local=F);
+   > dyn.load("../../Rperplex.so", now=T, local=F);
+- To use Perplex do
+   > ret = .Call("R_ini_phaseq", "in26klb_new");  ## ret should be zero
+   > ret = .Call("R_get_comp_order");  ## ret should be an array of components used
+   > ret = .Call("R_phaseq", 10000, 1623, c(44.2, 2.05, 8.29, 42.21, 1.92, 0.27)); ## ret[1] should be 
+                                           ## zero, ret[2] should have the phase wt%s in it.
+   
+Random notes for Windows usage:
+	# first modify meemum.f: remove main program 
+	
+	set PATH=c:\MinGW\bin;%PATH%
+	cd \Progs\perplex668
+	mingw32-gfortran.exe -c meemum.f -o meemum.o
+	cd ..\PrplxWrapWT
+	mingw32-cc -c perplex.c -o perplex.o
+	mingw32-cc -c Rperplex.c -o Rperplex.o -I\Progs\R-3.0.2\include
+	
+	# test program
+	cd distexamples
+	mingw32-cc -c gridding.c -o gridding.o
+	mingw32-gfortran ..\..\perplex668\meemum.o ..\perplex.o gridding.o -o gridding.exe
+	cd datfiles
+	..\gridding.exe
+	
+	# linking the DLL:
+	mingw32-gfortran -shared ..\perplex668\meemum.o perplex.o Rperplex.o -o libperplex.dll -lR -L\Progs\Rwin-3.0.2\bin\i386
+	
+
+Note 1. PerpleX option file (in PrplxWrapWT/distexamples/datfiles) has to be modified to give the 
+output in wt% (phase compositions and phase amounts).
+
+
+Note 2. If the wrapper is called from R, PerpleX source code has to be modified. This is because 
+R has numerical BLAS library linked in to it, and there are some subroutines in PerpleX that have
+the same name as some BLAS subroutines. The subroutines' names clash and PerpleX ends up calling 
+BLAS subroutines when it should be calling its own subroutines, resulting in a segmentation fault.
+The file perplex668.zip has these subroutines renamed and can be used as it is. If using another
+version of the source code, here is a list of the subroutines that have to be renamed (also change
+the calls to these subroutines).
+
+>       subroutine daxpy ( n, alpha, x, incx, y)
+>       subroutine dgemv ( trans, m, n, a, lda, x, beta, y )
+>       subroutine dger ( m, n, x, y, a, lda )
+>       subroutine dtrsv ( trans, n, a, lda, x)
+>       subroutine e04mfh(n,nclin,lda,istate,numinf,suminf,bl,a,
+>       subroutine e04mfj(rowerr,unitq,nclin,nactiv,nfree,nz,n,ldq,lda,
+>       subroutine e04mfk(nfree,n,nctotl,nactiv,kactiv,kx,
+>       subroutine e04mfl(n,nrz,nz,zerolm,notopt,numinf,trusml,
+>       subroutine e04mfm(n,lda,ldt,nactiv,nfree,nz,istate,
+>       subroutine e04mfq(n,nclin,istate,nviol,jmax,errmax,ax,bl,
+>       subroutine e04mfr(job,n,nclin,nmoved,iter,numinf,istate,
+>       subroutine e04mfs(firstv,n,nclin,istate,bigalf,pnorm,
+>       subroutine e04mfz(msg,unitq,iter,itmax,
+>       subroutine e04nbw(mode,n,nz,nfree,nq,unitq,kx,v,zy,wrk)
+>       subroutine e04nfp(unitq,it,n,nactiv,nfree,ngq,nz,nrz,lda,ldq,ldt,
+>       subroutine e04nfq(unitq,k1,k2,it,nactiv,nartif,nz,nfree,
+>       subroutine e04nfr(unitq,inform,ifix,iadd,jadd,it,nactiv,nz,
+>       double precision function ddot  ( n, x, incx, y)
+
+Bash command:
+mkdir -p new; for f in *.f; do echo $f; cat $f | sed -e 's/ daxpy/ p_daxpy/g' > new/$f; mv new/$f .; done; rmdir new
+
+If feeling lucky:
+for s in daxpy dgemv dger dtrsv e04mfh e04mfj e04mfk e04mfl e04mfm e04mfq e04mfr e04mfs e04mfz e04nbw e04nfp e04nfq e04nfr ddot; do mkdir -p new; for f in *.f; do cat $f | sed -e "s/ $s/ p$s/g" > new/$f; mv new/$f .; done; rmdir new; done
+
+
+
+
+

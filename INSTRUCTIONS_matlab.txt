@@ -1,0 +1,29 @@
+To run the "gridding" example:
+ 1) Go to perplex (6.6.8) source directory.
+ 2) Do "make meemum"
+ 3) Do "gcc -shared meemum.o -o libmeemum.so"
+
+ 4) Go to PrplxWrap source directory
+ 5) Modify makefile, change PERPLEXSRC to where the PerpleX source is
+ 6) Do "make obj" ("make Robj")
+ 7) Do "make shared" ("make Rshared")
+ 8) Change dir to distexamples
+ 9) Modify makefile, change PERPLEXSRC value
+10) Do "make"
+
+11) Do "export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/path/to/perplex_src:/path_to_perplexwrap_src"
+12) Change dir to "datfiles"
+13) Run "../gridding"
+
+
+To compile MATLAB mex file:
+ 0) Run steps 1-2 and 4-6 above
+ 1) Do "make matlab" -> Compiles as m_ini_phaseq.mexa64
+ 2) Run Matlab in distexamples/datfiles directory
+ 3) Run (in Matlab)
+      n = m_ini_phaseq(0, 'in26klb_new');
+ 4) Run (in Matlab)
+      m_ini_phaseq(1)
+    which should print out the order of components,
+    if everything went well...
+

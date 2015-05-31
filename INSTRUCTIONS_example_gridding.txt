@@ -1,0 +1,18 @@
+To run the "gridding" example:
+
+- Go to perplex (6.6.8) source directory.
+- Do "make meemum"
+- Do "gcc -shared meemum.o -o libmeemum.so"
+
+- Go to PrplxWrap source directory
+- Modify makefile, change PERPLEXSRC to where the PerpleX source is
+- Do "make obj" ("make Robj")
+- Do "make shared" ("make Rshared")
+- Change dir to distexamples
+- Modify makefile, change PERPLEXSRC value
+- Do "make"
+
+- Do "export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/path/to/perplex_src:/path_to_perplexwrap_src"
+- Change dir to "datfiles"
+- Run "../gridding"
+
