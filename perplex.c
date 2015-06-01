@@ -276,7 +276,8 @@ int number_of_sysprops() {
 }
 
 int phaseq(double P, double T, int ncomp, double *comp, int *nphases, 
-	double *wtphases, double *cphases, double *sysprop, char *namephases, int dbgprint) {
+	double *wtphases, double *cphases, double *sysprop, double *phsysprop, 
+	char *namephases, int dbgprint) {
 	/*
 	 * phaseq(): Calculate phase equilibria using Perple_X subroutines
 	 * 
@@ -293,6 +294,7 @@ int phaseq(double P, double T, int ncomp, double *comp, int *nphases,
 	 *  - cphases	  array of size nphases*ncomp: composition of 
 	 *                phases
 	 *  - sysprop     an array of system properties (see below)
+	 *  - phsysprop   an array of system properties for each phase
 	 *  - namephases  names of the stable phases returned
 	 * 
 	 * return value:  0: OK
@@ -555,6 +557,12 @@ int phaseq(double P, double T, int ncomp, double *comp, int *nphases,
 		(sysprop)[i] = cxt22_.psys[i];
 	}
 
+    for (i = 0; i < p_k5; i++) {
+        for (j = 0; j < p_i8; j++) {
+            (phsysprop)[i*p_i8 + j] = cxt22_.props[i][j];
+        }
+    }
+
 	if (dbgprint) {	
         fprintf(stderr, "\n\nSystem:\n\n");
         for (l = 0; l < 17; l++) fprintf(stderr, " %f ", cxt22_.psys[l]);
@@ -603,6 +611,7 @@ int phaseq(double P, double T, int ncomp, double *comp, int *nphases,
 		for (i = 0; i < p_k5; i++) {
 			for (j = 0; j < p_i8; j++) {
 				fprintf(stderr, "%f  ", cxt22_.props[i][j]);
+				// cxt22_.props(i8,k5)
 			}
 			fprintf(stderr, "\n");
 		}
