@@ -149,7 +149,7 @@ void calpr0_(int *lu);
 /* Functions of the wrapper */
 int ini_phaseq(char *);
 int ini_phaseq_lt(char *, int, char *);
-int phaseq(double, double, int, double*, int*, double*, double*, double*, char*, int);
+int phaseq(double, double, int, double*, int*, double*, double*, double*, double*, char*, int);
 void freearr(void **p);
 void print_comp_order();
 int get_comp_order(char **order);
