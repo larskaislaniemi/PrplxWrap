@@ -7,7 +7,7 @@ SOURCES=gridding.c
 
 OBJECTS=$(SOURCES:.c=.o)
 WRAPPEROBJECTS=../perplex.o
-PERPLEXSRC=../../perplex668
+PERPLEXSRC=../../perplex672
 PERPLEXOBJECTS=$(PERPLEXSRC)/meemum.o
 
 EXECUTABLE=gridding

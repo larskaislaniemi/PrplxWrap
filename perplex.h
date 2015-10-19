@@ -1,10 +1,11 @@
 /*
- * C wrapper for Perple_X v6.6.8
+ * C wrapper for Perple_X v6.7.2
  * - Perple_X by Jamie Connolly (see http://www.perplex.ethz.ch/)
  * - This wrapper by Lars Kaislaniemi (lars.kaislaniemi@iki.fi)
  */
 
 /* Changes:
+ * - 2015-10-19: Changes to make compatible with Perple_X v6.7.2
  * - 2013-06-11: Changes to parameters and common block definitions to 
  *   accommodate changes in PerpleX 6.6.8.
  * - 2012-03-23: Changed p_k21 from 500000 to 1000000, according 
@@ -81,8 +82,8 @@
 #define p_m2 8
 #define p_m3 3
 #define p_m4 15
-#define p_m6 4
-#define p_m7 12
+#define p_m6 5
+#define p_m7 15
 #define p_m8 9
 #define p_m9 10
 #define p_m10 5
@@ -117,7 +118,7 @@
 #define p_cname_len 6
 
 #define p_size_sysprops p_i8   // num of sysprops
-#define p_size_phases p_k0     // (max) num of phases
+#define p_size_phases p_k0     // (max) num of phases ("database components")
 #define p_size_components p_k5 // (max) num of components
 
 
@@ -152,9 +153,10 @@ int ini_phaseq_lt(char *, int, char *);
 int phaseq(double, double, int, double*, int*, double*, double*, double*, double*, char*, int);
 void freearr(void **p);
 void print_comp_order();
-int get_comp_order(char **order);
+int get_comp_order(char **);
 int number_of_components();
 void spc2null(char *arr, int len);
+int match_comp_order(char *, int *, int *);
 
 
 /* Lookup table definitions */
@@ -206,8 +208,8 @@ extern struct {
 } opts_;
       
 extern struct {
-	char prject[100];
-	char tfname[100];
+	char prject[p_max_filename_len];
+	char tfname[p_max_filename_len];
 } cst228_;
 
 extern struct {
@@ -235,7 +237,10 @@ extern struct {
 extern struct {
 	int ipot;
 	int jv[p_l2];
-	int iv[p_l2];
+	int iv[p_l2];  /* Note: In meemum.f this is defined like here,
+	                * in some other *.f files of Perple_X, this is defined
+	                * with iv1,iv2,iv3,... etc. Hope this is right...
+	                */
 } cst24_;
 
 extern struct {
@@ -254,7 +259,7 @@ extern struct {
 } cxt15_;
 
 extern struct {
-	char pname[p_k5][14];
+	char pname[p_k5][p_pname_len-1];  /* p_pname_len has space for NULL */
 } cxt21a_;
 
 extern struct {
@@ -266,7 +271,7 @@ extern struct {
 } cst324_;
 
 extern struct {
-	char cname[p_k5][5];
+	char cname[p_k5][p_cname_len-1];  /* p_cname_len has space for NULL */
 } csta4_;
 
 extern struct {
@@ -289,7 +294,8 @@ extern struct {
       int io3,io4,io9;
 } cst41_;
 
-/* Thsese should not be needed here:
+/* These should not be needed here:
+   ... and they date from version 6.6.6(??) so check before use... 
 
 extern struct {
 	double var[p_l3], dvr[p_l3], vmn[p_l3], vmx[p_l3];	

@@ -6,7 +6,7 @@
 #include "perplex.h"
 
 /*
- * C wrapper for Perple_X v6.6.8
+ * C wrapper for Perple_X v6.7.2
  * - Perple_X by Jamie Connolly (see http://www.perplex.ethz.ch/)
  * - This wrapper by Lars Kaislaniemi (lars.kaislaniemi@iki.fi)
  */
@@ -218,6 +218,45 @@ int ini_phaseq_lt(char *inputfile, int use_lookup, char *lookup_filename) {
 	return 0;
 }
 	
+int match_comp_order(char *wrappercomps, int *app2prp, int *prp2app) {
+    /* Given an array of component names (N x p_cname_len), returns
+     * a mapping (app2prp) from that to the PerpleX internal order
+     * of components, plus a reverse mapping (prp2app). 
+     *
+     * All arrays are assumed to have been allocated before calling
+     * this function.
+     */
+    int i, j, k, nmatch;
+    int chrMatch, strMatch;
+
+    if (app2prp == NULL || prp2app == NULL || wrappercomps == NULL) return -9;
+
+    nmatch = 0;
+
+    for (i = 0; i < cst6_.icomp; i++) {
+        strMatch = 0;
+        for (j = 0; j < cst6_.icomp; j++) {
+            chrMatch = 1;
+            for (k = 0; k < p_cname_len-1; k++) {
+                if (csta4_.cname[j][k] != wrappercomps[i*p_cname_len + k]) chrMatch = 0;
+            }
+            if (chrMatch == 1) {
+                app2prp[i] = j;
+                prp2app[j] = i;
+                strMatch = 1;
+                nmatch++;
+                break;
+            }
+        }
+        if (!strMatch) {
+            return -2;
+        }
+    }
+
+    if (nmatch != cst6_.icomp) return -3;
+
+    return 0;
+}
 
 void print_comp_order() {
 	/* This function prints the order of components. This is not 
