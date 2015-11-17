@@ -41,7 +41,7 @@ order_check                on   | on or off, on => compare order-disorder soluti
 pause_on_error              T   | T[rue] or F[alse], T => wait for user response after errors
 pc_perturbation           5d-3  | perturbation to pseudo-compound compositions, for Schreinemakers and Mixed-variable calculations
 poisson_ratio        on   0.35  | value 1: on, off or all; value 2: 0->0.5; poisson ratio estimates for shear moduli
-poisson_test               T    | T[rue] or F[alse], default is F, T => use poisson ratio to check for valid results
+poisson_test               F    | T[rue] or F[alse], default is F, T => use poisson ratio to check for valid results
 proportions               wt   | vol or wt; phase proportions
 pseudocompound_file        F    | echo static pseudocompound compositions to my_project_pseudocompound_list.txt
 reach_increment_switch     on   | all, on, off; default is on; all consumes more resources

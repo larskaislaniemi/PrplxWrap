@@ -22,11 +22,11 @@ class perplex:
          'V' : 0,
          'H' : 1,
          'Gruneisen_T' : 2,
-         'Ks bar' : 3,
-         'Mu bar' : 4,
-         'V0 km/s' : 5,
-         'Vp km/s' : 6,
-         'Vs km/s' : 7,
+         'Ks' : 3,
+         'Mu' : 4,
+         'V0' : 5,
+         'Vp' : 6,
+         'Vs' : 7,
          'Vp/Vs' : 8,
          'rho' : 9,
          'unknown10' : 10,
@@ -138,6 +138,8 @@ class perplex:
         nphases = nphases_type()
 
         use_composition = [composition[i] for i in self.c_prp2clr]
+        if dbgprint:
+            print "Calling phaseq:", P, T, use_composition
         retval = self.libpx.phaseq(P, T, self.ncomp, comp_type(*use_composition), nphases, wtphases,
                                    cphases, sysprop, phsysprop, namephases, dbgprint)
         nphases = nphases[0]
@@ -170,7 +172,8 @@ class perplex:
             'SYSPROP' : py_sysprop,
             'PHSYSPROP' : py_phsysprop,
             'NAMEPHASES' : py_namephases,
-            'NPHASES' : nphases
+            'NPHASES' : nphases,
+            'RETVAL' : retval
         }
 
         self.lastResult = ret

@@ -9,12 +9,12 @@ p_cname_len = 6   # const, includes space for NUL
 
 components = []   # will hold the oxide names
 
-lib_meemum = cdll.LoadLibrary('/home/lars/Progs/Code/perplex668/libmeemum.so') # this has to be compiled with gfortran, not gcc
-libpx = cdll.LoadLibrary('/home/lars/Progs/Code/PrplxWrapWT/libperplex.so')
+lib_meemum = cdll.LoadLibrary('/data/home/lkaislan/software/perplex672/libmeemum.so') # this has to be compiled with gfortran, not gcc
+libpx = cdll.LoadLibrary('/data/home/lkaislan/software/PrplxWrap/libperplex.so')
 
 libpx.ini_phaseq.restype = c_int
 libpx.ini_phaseq.argtypes = [c_char_p]
-libpx.ini_phaseq(b'/home/lars/Data/melto4/melto4')
+libpx.ini_phaseq(b'crustmod')
 
 # libpx.print_comp_order.restype = None
 # libpx.print_comp_order.argtypes = []
@@ -43,12 +43,45 @@ print ("Components are: ")
 for i in range(0,n):
     print("[" + components[i] + "]")
     
+comps = {
+    'NA2O ' : 0.0327,
+    'MGO  ' : 0.0248,
+    'AL2O3' : 0.1540,
+    'SIO2 ' : 0.6662,
+    'K2O  ' : 0.0280,
+    'CAO  ' : 0.0359,
+    'TIO2 ' : 0.0064,
+    'MNO  ' : 0.0010,
+    'FEO  ' : 0.0504,
+    'H2O  ' : 0.0000
+}
 
-P = 10000.0
-T = 1623.0
+P = 6000.0
+T = 900.0
 ncomp = n
 dbgprint = 1
-composition = [45.0, 43.0, 8.0, 2.0, 0.0, 2.0]
+composition = [0.00,    2.48,   15.40,  66.62,  2.80,   3.59,   0.64,   0.10,   5.04,   3.27]
+# [H2O]
+# [MGO]
+# [AL2O3]
+# [SIO2]
+# [K2O]
+# [CAO]
+# [TIO2]
+# [MNO]
+# [FEO]
+# [NA2O]
+
+# NA2O  1  3.27000      0.00000      0.00000     weight amount
+# MGO   1  2.48000      0.00000      0.00000     weight amount
+# AL2O3 1  15.4000      0.00000      0.00000     weight amount
+# SIO2  1  66.6200      0.00000      0.00000     weight amount
+# K2O   1  2.80000      0.00000      0.00000     weight amount
+# CAO   1  3.59000      0.00000      0.00000     weight amount
+# TIO2  1 0.640000      0.00000      0.00000     weight amount
+# MNO   1 0.100000      0.00000      0.00000     weight amount
+# FEO   1  5.04000      0.00000      0.00000     weight amount
+# H2O   1  0.00000      0.00000      0.00000     weight amount
 
 comp_type = c_double * ncomp
 wtphases_type = c_double * p_size_phases

@@ -60,6 +60,7 @@ Opx(HP)
 Bio(HP)   
 Gt(HP)    
 Cpx(HP)   
+oAmph(DP) 
 GlTrTsPg  
 Chl(HP)   
 melt(HP)  
@@ -67,14 +68,22 @@ Pheng(HP)
 Sapp(HP)  
 Osm(HP)   
 Sp(HP)    
+hCrd
+Scap
 T         
 St(HP)    
 Ctd(HP)   
 feldspar  
+Ep(HP)    
+O(HP)     
+Do(HP)    
+ IlGkPy    
+Ilm(WPH)
+Carb(M)
 end solution phase list
 
- 10000.      1273.0     0.00000000  0.0000      0.0000     max p, t, xco2, u1, u2
- 1.0000      273.00     0.00000000  0.0000      0.0000     min p, t, xco2, u1, u2
+ 6000.      1173.0     0.00000000  0.0000      0.0000     max p, t, xco2, u1, u2
+ 3000.      573.00     0.00000000  0.0000      0.0000     min p, t, xco2, u1, u2
  0.0000      0.0000     0.00000000  0.0000      0.0000     unused place holder post 06
 
  2  1  4  5  3   indices of 1st & 2nd independent & sectioning variables
