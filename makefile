@@ -2,27 +2,26 @@ CC=gcc
 RCC=gcc
 #PROFILEROPT=-pg
 PROFILEROPT=
-#MEX=/home/lars/Progs/MATLAB/R2014a/bin/mex
-MEX=/usr/local/bin/mex
+MEX=mex
 OPTDEF=-DUSE_LPOPT_WARM_START=1
 #OPTDEF=
-OPTIMIZATION=-g
+#OPTIMIZATION=-g
+OPTIMIZATION=-O3
 CFLAGS=-c -Wall $(OPTIMIZATION) -fPIC $(OPTDEF) $(PROFILEROPT)
 MFLAGS=-lgfortran
 LDFLAGS=-lgfortran $(OPTIMIZATION) $(PROFILEROPT)
 SOURCES=perplex.c 
 MSOURCES=m_ini_phaseq.c
-RINCLUDE=-I/opt/local/Library/Frameworks/R.framework/Resources/include
-RLIB=-L/opt/local/Library/Frameworks/R.framework/Resources/lib
 RSOURCES=Rperplex.c
 RCFLAGS=-I/usr/share/R/include -std=gnu99
-RLDFLAGS=$(RLIB) -lR
+RLDFLAGS=-L/usr/lib/R/lib -lR
 OBJECTS=$(SOURCES:.c=.o)
 ROBJECTS=$(RSOURCES:.c=.o)
 RSHLIB=$(RSOURCES:.c=.so)
 SHLIB=libperplex.so
-PERPLEXSRC=../perplex668
-PERPLEXOBJECTS=$(PERPLEXSRC)/meemum.o
+#PERPLEXSRC=/home/julienko/Desktop/Perple_X_6.8.1_source/perplex-stable
+PERPLEXSRC=../perplex-stable
+PERPLEXOBJECTS=$(PERPLEXSRC)/meemum.o $(PERPLEXSRC)/getxz1.o $(PERPLEXSRC)/dumlib.o $(PERPLEXSRC)/resub.o $(PERPLEXSRC)/nlib.o $(PERPLEXSRC)/olib.o $(PERPLEXSRC)/clib.o $(PERPLEXSRC)/rlib.o $(PERPLEXSRC)/tlib.o $(PERPLEXSRC)/flib.o
 #PERPLEXOBJECTS=
 EXECUTABLE=
 
@@ -32,20 +31,20 @@ clean:
 	rm -f $(OBJECTS) $(ROBJECTS) $(RSHLIB) $(EXECUTABLE)
 
 Robj: $(RSOURCES) $(PERPLEXOBJECTS)
-	$(CC) $(CFLAGS) $(RCFLAGS) $(RINCLUDE) $(RSOURCES)
+	$(CC) $(CFLAGS) $(RCFLAGS) $(RSOURCES)
 
 obj: $(SOURCES) $(PERPLEXOBJECTS) 
 	$(CC) $(CFLAGS) $(SOURCES)
 
 shared: $(OBJECTS)
-	$(CC) $(OPTIMIZATION) -shared -o $(SHLIB) $(OBJECTS) $(PERPLEXOBJECTS) $(LDFLAGS) 
+	$(CC) $(OPTIMIZATION) -shared -o $(SHLIB) $(OBJECTS)
 
 Rshared: $(OBJECTS) $(ROBJECTS) $(PERPLEXOBJECTS)
 	$(RCC) -shared -o $(RSHLIB) $(ROBJECTS) $(OBJECTS) $(PERPLEXOBJECTS) $(LDFLAGS) $(RLDFLAGS)
 
 
 matlab: $(OBJECTS) $(PERPLEXOBJECTS) $(MSOURCES)
-	$(MEX) $(MFLAGS) $(MSOURCES) $(OBJECTS) $(PERPLEXOBJECTS)
+	/usr/local/MATLAB/R2017b/bin/mex $(MFLAGS) $(MSOURCES) $(OBJECTS) $(PERPLEXOBJECTS)
 
 $(EXECUTABLE): $(OBJECTS) $(PERPLEXOBJECTS)
 	$(CC) $(LDFLAGS) $(OBJECTS) $(PERPLEXOBJECTS) -o $@

@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <math.h>
 #include "perplex.h"
 
 /*
@@ -60,10 +59,6 @@
 int lpopt_warmstart;
 
 int ini_phaseq(char *inputfile) {
-    return ini_phaseq_lt(inputfile, 0, NULL);
-}
-
-int ini_phaseq_lt(char *inputfile, int use_lookup, char *lookup_filename) {
 	/*
 	 * ini_phaseq(): call Perple_X initialization subroutines.
 	 * This needs to be called every time the input file 
@@ -71,8 +66,6 @@ int ini_phaseq_lt(char *inputfile, int use_lookup, char *lookup_filename) {
 	 * 
 	 * input:
 	 *  - inputfile	input file name (created by Perple_X BUILD)
-	 *  - use_lookup boolean whether to use lookup table
-	 *  - tablename lookup table filename
 	 *
 	 * return value:
 	 *  -  0: OK
@@ -80,12 +73,6 @@ int ini_phaseq_lt(char *inputfile, int use_lookup, char *lookup_filename) {
 	 */
 
 	int first, output, err;
-	
-	FILE *fp;
-	int lt_read_int;
-	double lt_read_double;
-	int lt_read_res;
-	int ic, ip, it;
 
 	/* Following is pretty much a copy&paste from
 	 * Perple_X program MEEMUM. Instead of calling 
@@ -126,94 +113,6 @@ int ini_phaseq_lt(char *inputfile, int use_lookup, char *lookup_filename) {
 	
 	/* TODO: check whether initialization succeeded or not,
 	 * and adjust return value accordingly */
-	 
-	 p_use_lookup_table = use_lookup;
-	 // ""p_lt_filename = lookup_filename;""
-	 
-	 if (p_use_lookup_table) {
-	    p_lt_meltphasename = (char *)malloc(sizeof(char) * p_pname_len);
-	    sprintf(p_lt_meltphasename, "melt(HP)      ");
-	    p_lt_meltphasename[p_pname_len] = '\0';
-	    
-	    fp = fopen(lookup_filename, "r");
-	    if (fp == NULL) {
-	        p_use_lookup_table = 0;
-	        fprintf(stderr, "!! Error initializing lookup table: can't read file\n");
-	    } else {
-	    
-	        lt_read_res = fscanf(fp, "%d", &lt_read_int);
-	        if (lt_read_res == 0) {
-	            lt_read_int = 0;
-	        } 
-	        
-	        if (lt_read_int != number_of_components()) {
-	            p_use_lookup_table = 0;
-	            fprintf(stderr, "!! Error initializing lookup table: incompatible num of components\n");
-	            return 0;
-	        }
-	        p_lt_ncomp = lt_read_int;
-	        
-            
-            p_lt_comps = (double *)malloc(sizeof(double) * p_lt_ncomp);
-            for (ic = 0; ic < p_lt_ncomp; ic++) {
-                lt_read_res = fscanf(fp, "%lg", &lt_read_double);
-                if (lt_read_res == 0) {
-                    fprintf(stderr, "!! Error initializing lookup table: read error\n");
-                    p_use_lookup_table = 0;
-                } else {
-                    p_lt_comps[ic] = lt_read_double;
-                }
-            }
-            
-            lt_read_res = fscanf(fp, "%lg", &lt_read_double);
-            if (lt_read_res == 0) { fprintf(stderr, "!! Error initializing lookup table: read error\n"); p_use_lookup_table = 0; return 0; }
-            else p_lt_pmin = lt_read_double;
-
-            lt_read_res = fscanf(fp, "%lg", &lt_read_double);
-            if (lt_read_res == 0) { fprintf(stderr, "!! Error initializing lookup table: read error\n"); p_use_lookup_table = 0; return 0; }
-            else p_lt_tmin = lt_read_double;
-
-            lt_read_res = fscanf(fp, "%lg", &lt_read_double);
-            if (lt_read_res == 0) { fprintf(stderr, "!! Error initializing lookup table: read error\n"); p_use_lookup_table = 0; return 0; }
-            else p_lt_pmax = lt_read_double;
-
-            lt_read_res = fscanf(fp, "%lg", &lt_read_double);
-            if (lt_read_res == 0) { fprintf(stderr, "!! Error initializing lookup table: read error\n"); p_use_lookup_table = 0; return 0; }
-            else p_lt_tmax = lt_read_double;
-            
-            lt_read_res = fscanf(fp, "%d", &lt_read_int);
-            if (lt_read_res == 0) { fprintf(stderr, "!! Error initializing lookup table: read error\n"); p_use_lookup_table = 0; return 0; }
-            else p_lt_nppts = lt_read_int;
-            
-            lt_read_res = fscanf(fp, "%d", &lt_read_int);
-            if (lt_read_res == 0) { fprintf(stderr, "!! Error initializing lookup table: read error\n"); p_use_lookup_table = 0; return 0; }
-            else p_lt_ntpts = lt_read_int;
-
-            p_lt_pdata = (double *)malloc(sizeof(double) * p_lt_nppts * p_lt_ntpts);
-            p_lt_tdata = (double *)malloc(sizeof(double) * p_lt_nppts * p_lt_ntpts);
-            p_lt_wtdata = (double *)malloc(sizeof(double) * p_lt_nppts * p_lt_ntpts);
-            p_lt_compdata = (double *)malloc(sizeof(double) * p_lt_nppts * p_lt_ntpts * p_lt_ncomp);
-            
-            for (ip = 0; ip < p_lt_nppts; ip++) {
-                for (it = 0; it < p_lt_ntpts; it++) {
-                    lt_read_res = fscanf(fp, "%lg", &lt_read_double);
-                    p_lt_pdata[ip*p_lt_nppts + it] = lt_read_double;
-                    lt_read_res = fscanf(fp, "%lg", &lt_read_double);
-                    p_lt_tdata[ip*p_lt_nppts + it] = lt_read_double;
-                    lt_read_res = fscanf(fp, "%lg", &lt_read_double);
-                    p_lt_wtdata[ip*p_lt_nppts + it] = lt_read_double;
-                    
-                    for (ic = 0; ic < p_lt_ncomp; ic++) {
-                        lt_read_res = fscanf(fp, "%lg", &lt_read_double);
-                        p_lt_compdata[(ip*p_lt_nppts + it)*p_lt_ncomp + ic] = lt_read_double;
-                    }
-                }
-            }
-    	    fclose(fp);
-	        p_lt_dataread = 1;
-	        fprintf(stderr, "!! Lookup table successfully read.\n");
-	    }
-	 }
 
 	return 0;
 }
@@ -251,22 +150,6 @@ int get_comp_order(char **order) {
     return n * p_cname_len;
 }
 
-int get_comp_order_list(char *order) {
-    /* like get_comp_order() but returns a single char array, no NULs) */
-    /* assumes mem is reserved! */
-    int n = number_of_components();
-    int i;
-    if (order == NULL) {
-        return -1;
-    }
-    for (i = 1; i <= n; i++) {
-        memcpy((void *)(order + (i-1)*(p_cname_len-1)*sizeof(char)), 
-               (void *)(csta4_.cname[i-1]),
-               sizeof(char) * (p_cname_len-1));
-    }
-    return n * (p_cname_len-1);
-}
-
 int number_of_components() {
     return cst6_.icomp;
 }
@@ -276,8 +159,7 @@ int number_of_sysprops() {
 }
 
 int phaseq(double P, double T, int ncomp, double *comp, int *nphases, 
-	double *wtphases, double *cphases, double *sysprop, double *phsysprop, 
-	char *namephases, int dbgprint) {
+	double *wtphases, double *cphases, double *sysprop, char *namephases, int dbgprint) {
 	/*
 	 * phaseq(): Calculate phase equilibria using Perple_X subroutines
 	 * 
@@ -294,14 +176,13 @@ int phaseq(double P, double T, int ncomp, double *comp, int *nphases,
 	 *  - cphases	  array of size nphases*ncomp: composition of 
 	 *                phases
 	 *  - sysprop     an array of system properties (see below)
-	 *  - phsysprop   an array of system properties for each phase
 	 *  - namephases  names of the stable phases returned
 	 * 
 	 * return value:  0: OK
 	 *               >0: Perple_X failed minimization
 	 *               <0: Other error
 	 * 
-	 * The system properties array has length of p_i8 (see defs in perplex.h)
+	 * The system properties array has length if p_i8 (see defs in perplex.h)
 	 * and has following properties in it:
 	 *  0 V J/bar*
 	 *  1 H J*
@@ -311,7 +192,7 @@ int phaseq(double P, double T, int ncomp, double *comp, int *nphases,
 	 *  5 V0 km/s
 	 *  6 Vp km/s
 	 *  7 Vs km/s
-	 *  8 Vp/Vs
+	 *  8 ?
 	 *  9 Rho kg/m3
 	 *  10 ?
 	 *  11 Cp J/K*
@@ -320,20 +201,9 @@ int phaseq(double P, double T, int ncomp, double *comp, int *nphases,
 	 *  14 S J/K*
 	 *  15 ?
 	 *  16 N g*
-         *  17...26 (?)
-         *  27 Cp/Cv
-         *  28 (?)
 	 * (*) = molar property
 	 * 
-         * Other system properties are calculated by meemum as follows:
-         * (NB Fortran indexing starts from 1)
-         *  Enthalpy = psys(2) / psys(1) * 1d5 / psys(10)
-         *  Spec. enthalpy = psys(2) / psys(1) * 1d5
-         *  Entropy = psys(15) / psys(1) * 1d5 / psys(10)
-         *  Spec. entropy = psys(15) / psys(1) * 1d5
-         *  Cp = psys(12) / psys(1) * 1d5 / psys(10)
-         *  Spec. Cp = psys(12) / psys(1) * 1d5
-	 */ 
+	 */
 
 	
 	cst4_.iam = 2;	/* we fake us as being Perple_X program MEEMUM.
@@ -344,57 +214,6 @@ int phaseq(double P, double T, int ncomp, double *comp, int *nphases,
 	int result;
 	double sum;
 	int same_comp = 1;
-	int pot_index_T, pot_index_P;
-	pot_index_P = pot_index_T = -1;
-	
-	int lt_samecomp, lt_ip, lt_it, lt_used;
-	
-	lt_used = 0;
-	
-	if (p_use_lookup_table && p_lt_dataread && ncomp == p_lt_ncomp) {
-	    lt_samecomp = 1;
-	    
-	    for (i = 0; i < ncomp; i++) {
-	        if ((int)(p_lt_bulk_comp_accuracy * comp[i]) != (int)(p_lt_bulk_comp_accuracy * p_lt_comps[i])) {
-	            lt_samecomp = 0;
-	            fprintf(stderr, "%g != %g\n", comp[i], p_lt_comps[i]);
-        	    fprintf(stderr, "!! Not the bulk compo ...\n");
-	            break;
-	        }
-	    }
-	    
-	    if (lt_samecomp) {
-	        if (P > p_lt_pmin && P < p_lt_pmax && 
-	            T > p_lt_tmin && T < p_lt_tmax) {
-	            lt_ip = floor(p_lt_nppts * (P - p_lt_pmin) / (p_lt_pmax - p_lt_pmin));
-	            lt_it = floor(p_lt_ntpts * (T - p_lt_tmin) / (p_lt_tmax - p_lt_tmin));
-	           
-	            *nphases = 2;
- 	            wtphases[0] = p_lt_wtdata[lt_ip * p_lt_nppts + lt_it];
-	            wtphases[1] = 1 - wtphases[0];
-	            memcpy(namephases, p_lt_meltphasename, p_pname_len);
-	            sprintf(namephases + p_pname_len, "XXXXXXXXXXXXXXX");
-	            (namephases + p_pname_len)[p_pname_len] = '\0';
-	           
-	            for (i = 0; i < p_size_sysprops; i++) {
-	                sysprop[i] = 0;
-	            }
-	            
-	            for (i = 0; i < ncomp; i++) {
-	                cphases[i] = p_lt_compdata[(lt_ip*p_lt_nppts + lt_it)*ncomp + i];
-	                cphases[ncomp*1 + i] = 0.0;
-	            }
-	            
-	            lt_used = 1;
-	        } else {
-        	    fprintf(stderr, "!! Outside PT ...\n");
-            }
-	    }
-	}
-	
-	if (lt_used) {
-	    return 0;
-	}
 	
 	/* some return values from Perple_X subroutines */
 	int itri[4] = { 0, 0, 0, 0 };
@@ -405,24 +224,7 @@ int phaseq(double P, double T, int ncomp, double *comp, int *nphases,
 
 	int numofphases;
 	
-	/* Find if P and T are the variables.
-         * TODO(?): Could be actually read from the input build file */
-	/* from perplex_parameters.h, l2 = max num of indep pot variables */
-	for (i = 0; i < p_l2; i++) {
-		if (*csta2_.vname[cst24_.jv[i]-1] == 'T') {
-			pot_index_T = i;
-		} else if (*csta2_.vname[cst24_.jv[i]-1] == 'P') {
-			pot_index_P = i;
-		}
-	}
-	if (pot_index_T < 0 || pot_index_P < 0) {
-		fprintf(stderr, "!! Independent variables in configuration file are not P & T, please fix.\n");
-		return -1;
-	}
-	cst5_.v[cst24_.jv[pot_index_T]-1] = T;
-	cst5_.v[cst24_.jv[pot_index_P]-1] = P;
-
-	/*if (*csta2_.vname[cst24_.jv[0]-1] == 'T' &&
+	if (*csta2_.vname[cst24_.jv[0]-1] == 'T' &&
         *csta2_.vname[cst24_.jv[1]-1] == 'P') {
 		cst5_.v[cst24_.jv[0]-1] = T;
 		cst5_.v[cst24_.jv[1]-1] = P;
@@ -433,7 +235,7 @@ int phaseq(double P, double T, int ncomp, double *comp, int *nphases,
 	} else {
 		fprintf(stderr, "!! Independent variables in configuration file are not P & T, please fix.\n");
 		return -1;
-	}*/
+	}
 	
 	if (ncomp != cst6_.icp) {
 		fprintf(stderr, "!! Number of components (ncomp=%d) disagrees with number or components in Perple_X input file (=%d).\n",
@@ -465,12 +267,12 @@ int phaseq(double P, double T, int ncomp, double *comp, int *nphases,
 		sum += cst300_.cblk[i];
 	}
 	for (i = 0; i < cst6_.icp; i++) {
-            double val;
-            val = cst300_.cblk[i] / sum;
-            if (cst313_.b[i] != val) {
-    	        cst313_.b[i] = val;
-                same_comp = 0;
-            }
+        double val;
+        val = cst300_.cblk[i] / sum;
+        if (cst313_.b[i] != val) {
+    		cst313_.b[i] = val;
+            same_comp = 0;
+        }
 	}
 	for ( ; i < p_k5; i++) {
 		cst313_.b[i] = 0.0;
@@ -482,10 +284,9 @@ int phaseq(double P, double T, int ncomp, double *comp, int *nphases,
 	
 
 		/*fprintf(stderr, "Pointer for 0 is %d\n", cst24_.jv[1]);*/
-		/*fprintf(stderr, "Pot are (%s) (%s)\n", csta2_.vname[cst24_.jv[0]-1], csta2_.vname[cst24_.jv[1]-1]);*/
-		fprintf(stderr, "T (%s) and P (%s)\n", csta2_.vname[cst24_.jv[pot_index_T]-1], csta2_.vname[cst24_.jv[pot_index_P]-1]);
+		fprintf(stderr, "Pot are %s\n", csta2_.vname[cst24_.jv[0]-1]);
 		/*fprintf(stderr, "Molar mass of %s is %f\n", csta4_.cname[0], cst45_.atwt[0]);*/
-		fprintf(stderr, "Potential value of T is %f, of P is %f\n", cst5_.v[cst24_.jv[pot_index_T]-1], cst5_.v[cst24_.jv[pot_index_P]-1]);
+		fprintf(stderr, "Potential value of 1 is %f\n", cst5_.v[cst24_.jv[1]-1]);
 		fprintf(stderr, "Molar composition (sum=%g: ", sum);
 		for (i = 0; i < cst6_.icp; i++) {
 			fprintf(stderr, " %f", cst313_.b[i]);
@@ -498,15 +299,18 @@ int phaseq(double P, double T, int ncomp, double *comp, int *nphases,
     if (lpopt_warmstart && same_comp) {
         result = -1;
         cst111_.istart = 2;
+        fprintf(stderr, "1 lpopt0\n");
         lpopt0_(&result);
     } else {
         result = 0;
         cst111_.istart = 0;
+        fprintf(stderr, "2 lpopt0\n");
         lpopt0_(&result);
     }
 #else
     result = 0;
     cst111_.istart = 0;
+    fprintf(stderr, "3 lpopt0\n");
     lpopt0_(&result);
 #endif
 
@@ -525,7 +329,7 @@ int phaseq(double P, double T, int ncomp, double *comp, int *nphases,
 	 * This might be unnecessary if only phase composition data
 	 * is needed.
 	 */
-    getloc_(itri, jtri, &ijpt, wt, &nodata);
+	getloc_(itri, jtri, &ijpt, wt, &nodata);
 	
 	numofphases = cxt15_.ntot;
 	*nphases = numofphases;
@@ -545,7 +349,7 @@ int phaseq(double P, double T, int ncomp, double *comp, int *nphases,
 
 	for (i = 0; i < numofphases; i++) {
 		strncpy(namephases + i*p_pname_len, (const char *)(&cxt21a_.pname[i]), p_pname_len-1);
-		(namephases + (i+1)*p_pname_len - 1)[0] = '\0';
+		(namephases + (i+1)*p_pname_len - 1)[0] = ' '; /* JvH 20160806 changed this from '\0' */
 
 		(wtphases)[i] = 100 * cxt22_.props[i][16] * cxt22_.props[i][15] / cxt22_.psys[16];
 
@@ -556,12 +360,6 @@ int phaseq(double P, double T, int ncomp, double *comp, int *nphases,
 	for (i = 0; i < p_i8; i++) {
 		(sysprop)[i] = cxt22_.psys[i];
 	}
-
-    for (i = 0; i < p_k5; i++) {
-        for (j = 0; j < p_i8; j++) {
-            (phsysprop)[i*p_i8 + j] = cxt22_.props[i][j];
-        }
-    }
 
 	if (dbgprint) {	
         fprintf(stderr, "\n\nSystem:\n\n");
@@ -611,7 +409,6 @@ int phaseq(double P, double T, int ncomp, double *comp, int *nphases,
 		for (i = 0; i < p_k5; i++) {
 			for (j = 0; j < p_i8; j++) {
 				fprintf(stderr, "%f  ", cxt22_.props[i][j]);
-				// cxt22_.props(i8,k5)
 			}
 			fprintf(stderr, "\n");
 		}
@@ -640,15 +437,5 @@ void freearr(void **p) {
 		free(*p);
 		*p = NULL;
 	}
-}
-
-void spc2null(char *arr, int len) {
-	int i;
-	for (i = 0; i < len; i++) {
-		if (arr[i] == ' ') {
-			arr[i] = '\0';
-		}
-	}
-	return;
 }
 

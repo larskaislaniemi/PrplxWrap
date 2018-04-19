@@ -5,6 +5,9 @@
  */
 
 /* Changes:
+ * - 2018-03-15: Changes in parameters to accomodate changes in ppx-6.8.1 (Julien Cornet)
+ * 				 Change in common block cxt15: K19 replaced k5 in the declaration
+ * - 2016-10-24: Changes in parameters according to changes in Perple_X.6.7.4 (Julien Cornet)
  * - 2013-06-11: Changes to parameters and common block definitions to 
  *   accommodate changes in PerpleX 6.6.8.
  * - 2012-03-23: Changed p_k21 from 500000 to 1000000, according 
@@ -18,6 +21,8 @@
  */
 #define p_n10 7
 #define p_n11 8
+#define p_n12 20 /* two new constant n12 n13 in ppx-6.8.1*/
+#define p_n13 21
 #define p_n1 11
 #define p_n2 12
 #define p_n3 13
@@ -30,7 +35,7 @@
 #define p_n0 30	
 #define p_mst 2
 #define p_mdim 8
-#define p_msp (p_mdim+1)
+#define p_msp (p_mdim+2)
 #define p_ms1 (p_msp-1)
 #define p_h5 5
 #define p_h6 500
@@ -40,64 +45,67 @@
 #define p_i7 20
 #define p_i8 28
 #define p_i9 200
-#define p_i10 40
-#define p_i11 80
+#define p_i10 50 /* previous 40 */
+#define p_i11 100 /* previous 80 */
 #define p_j3 4
-#define p_j4 5
-#define p_j5 8
+#define p_j4 6 /* previous 5 */
+#define p_j5 8 /* old = 6*/
 #define p_j6 8
 #define p_j9 160000
 #define p_k0 25
-#define p_k1 1000000
+#define p_k1 1500000
 #define p_k2 100000
-#define p_k3 500
-#define p_k4 32
+#define p_k3 2000
+#define p_k4 32 /* old = 23*/
 #define p_k5 12
 #define p_k7 (p_k5+1)
 #define p_k8 (p_k5+2)
 #define p_k9 30
-#define p_k10 300
-#define p_k12 15
-#define p_k13 (p_mdim*p_k1)
+#define p_k10 400 /* old = 350*/
+/* #define p_k12 15 does not exist in the new version.. what to do???*/
+#define p_k13 (p_mdim*p_k21)
 #define p_k14 18
 #define p_k15 6
-#define p_k16 50
+#define p_k16 70 /* old = 40*/
 #define p_k17 7
 #define p_k18 (29*p_k1)
-#define p_k19 (2*p_k5+14)
-#define p_k21 1700000
-#define p_k20 (p_mdim*p_k21)
+#define p_k19 (3*p_k5)
+#define p_k21 2000000
+#define p_k20 ((p_mdim+3)*p_k21)
 #define p_k22 (p_mdim*p_k19)
-#define p_k23 5
-#define p_k24 1
+#define p_k23 25
+#define p_k24 p_k13*mst
 #define p_l2 5
 #define p_l3 (p_l2+2)
 #define p_l5 1000
 #define p_l6 1000
 #define p_l7 2048
 #define p_l8 10
+#define p_l9 100
+#define p_l10 nsp+p_l9+4
 #define p_m0 8
-#define p_m1 36
+#define p_m1 60 /* old = 36*/
 #define p_m2 8
 #define p_m3 3
-#define p_m4 15
-#define p_m6 4
-#define p_m7 12
+#define p_m4 20 /* old = 15*/
+#define p_m6 5 /* old = 4*/
+#define p_m7 15 /* old = 12*/
 #define p_m8 9
 #define p_m9 10
-#define p_m10 5
-#define p_m11 5
+#define p_m10 6 /* old = 5*/
+#define p_m11 6 /* old = 5*/
 #define p_m12 4
 #define p_m13 8
 #define p_m14 2
-#define p_m15 9
+#define p_m15 10
 #define p_m16 5
-#define p_m17 5
-#define p_m18 6
-#define p_nsp 16
+#define p_m17 5	 
+#define p_m18 6 /* does not exist initially in the wrapper */
+#define p_nsp 17
 #define p_nx 500
 #define p_ny 500
-#define p_kd2 (p_k8*31)
+#define p_kd2 (p_k8*35) /* old = (p_k8*31) */
+#define p_lchar 400
 
 /* Maximum length of the filename passed to ini_phaseq / in
  * cst228.prject. Including trailing \0.
@@ -116,9 +124,9 @@
  */
 #define p_cname_len 6
 
-#define p_size_sysprops p_i8   // num of sysprops
-#define p_size_phases p_k0     // (max) num of phases
-#define p_size_components p_k5 // (max) num of components
+#define p_size_sysprops p_i8   /* num of sysprops */
+#define p_size_phases p_k0     /* (max) num of phases */
+#define p_size_components p_k5 /* (max) num of components */
 
 
 /* PerpleX (Fortran) subroutines that read initial setup
@@ -129,9 +137,9 @@ void input2_(int *first);
 void setau1_(int *output);
 void input9_(int *first, int *output);
 void initlp_();
-// void vrsion_(); // not used
-// void fopen1_(); // not used
-// void iniprp_(); // not used
+/* void vrsion_(); // not used */ 
+/* void fopen1_(); // not used */
+/* void iniprp_(); // not used */
 
 
 /* PerpleX subroutines for phase equilibria calculations, 
@@ -141,34 +149,18 @@ void initlp_();
 void lpopt0_(int *result);
 void getloc_(int *itri, int *jtri, int *ijpt, double *wt, int *nodata);
 void calpr0_(int *lu);
-// void rebulk_(int *isstatic); // not used
-// void reopt_(int *result);    // not used
-// void yclos1_(double *clamda, double *x, int *is, int *jphct, int *quit); // not used
+/* void rebulk_(int *isstatic); // not used */
+/* void reopt_(int *result);    // not used */
+/* void yclos1_(double *clamda, double *x, int *is, int *jphct, int *quit); // not used */
 
 
 /* Functions of the wrapper */
 int ini_phaseq(char *);
-int ini_phaseq_lt(char *, int, char *);
-int phaseq(double, double, int, double*, int*, double*, double*, double*, double*, char*, int);
+int phaseq(double, double, int, double*, int*, double*, double*, double*, char*, int);
 void freearr(void **p);
 void print_comp_order();
 int get_comp_order(char **order);
 int number_of_components();
-void spc2null(char *arr, int len);
-
-
-/* Lookup table definitions */
-#define p_lt_bulk_comp_accuracy 5
-int p_use_lookup_table;
-char *p_lt_filename;
-char *p_lt_meltphasename;
-int p_lt_dataread;
-int p_lt_ncomp;
-double *p_lt_comps;
-double p_lt_pmin, p_lt_pmax, p_lt_tmin, p_lt_tmax;
-int p_lt_nppts, p_lt_ntpts;
-double *p_lt_pdata, *p_lt_tdata, *p_lt_wtdata, *p_lt_compdata;
-
 
 /* Variables of the wrapper */
 /* int lpopt_warmstart; */   /* set cst111_.istart to 1 before calling lpopt */
@@ -189,11 +181,6 @@ double *p_lt_pdata, *p_lt_tdata, *p_lt_wtdata, *p_lt_compdata;
 extern struct {
 	int iam;
 } cst4_;
-
-extern struct {
-	double goodc[3];
-	double badc[3];
-} cst20_;
 
 extern struct {
 	int gflu, aflu, fluid[p_k5], shear, lflu, volume, rxn;
@@ -247,10 +234,15 @@ extern struct {
 	int jphct, istart;
 } cst111_;
 
-extern struct {
+/*extern struct {
 	double cp3[p_k5][p_k0];
 	double amt[p_k5];
 	int kkp[p_k5], np, ncpd, ntot;
+} cxt15_;*/
+extern struct {						/* k19 replace k5 in common block cxt15 in ppx681 (JCornet 2018)*/
+	double cp3[p_k19][p_k0];
+	double amt[p_k19];
+	int kkp[p_k19], np, ncpd, ntot;
 } cxt15_;
 
 extern struct {
@@ -273,21 +265,6 @@ extern struct {
 	double gtot, fbulk[p_k0], gtot1, fbulk1[p_k0];
 } cxt81_;
 
-extern struct {
-	int iwt;
-} cst209_;
-
-extern struct {
-      double cptot[p_k5];
-      double ctotal;
-      int jdv[p_k19];
-      int npt;
-      int fulrnk;
-} cst78_;
-
-extern struct {
-      int io3,io4,io9;
-} cst41_;
 
 /* Thsese should not be needed here:
 
@@ -423,6 +400,9 @@ extern struct {
 	double buf[5];
 } cst112_;
 
+extern struct {
+	int iwt;
+} cst209_;
 
 extern struct {
 	int ivfl;
@@ -572,6 +552,9 @@ extern struct {
       int oned;
 } cst82_;
 
+extern struct {
+      int io3,io4,io9;
+} cst41_;
 
 extern struct {
 	int pindex, tindex;
@@ -594,6 +577,13 @@ extern struct {
 } cst226_;
       
 
+extern struct {
+      double cptot[p_k5];
+      double ctotal;
+      int jdv[p_k19];
+      int npt;
+      int fulrnk;
+} cst78_;
 
 
 

@@ -15,7 +15,7 @@
  * numeric constant 14. We add one to include the 
  * trailing \0 in C 
  */
-#define p_pname_len 15
+#define p_pname_len 15 
 
 
 /* Functions of the wrapper */

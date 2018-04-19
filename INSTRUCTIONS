@@ -1,0 +1,46 @@
+To run the "gridding" example:
+ 1) Go to perplex (6.6.8) source directory.
+ 2) Do "make meemum"
+ 3) Do "gcc -shared meemum.o -o libmeemum.so"
+
+ 4) Go to PrplxWrap source directory
+ 5) Modify makefile, change PERPLEXSRC to where the PerpleX source is
+ 6) Do "make obj" ("make Robj")
+ 7) Do "make shared" ("make Rshared")
+ 8) Change dir to distexamples
+ 9) Modify makefile, change PERPLEXSRC value
+10) Do "make"
+
+11) Do "export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/path/to/perplex_src:/path_to_perplexwrap_src"
+12) Change dir to "datfiles"
+13) Run "../gridding"
+
+
+To compile MATLAB mex file:
+ 0) Run steps 1-2 and 4-6 above
+ 1) Do "make matlab" -> Compiles as m_ini_phaseq.mexa64
+ 2) Run Matlab in distexamples/datfiles directory
+ 3) Run (in Matlab)
+      n = m_ini_phaseq(0, 'in26klb_new');
+ 4) Run (in Matlab)
+      m_ini_phaseq(1)
+    which should print out the order of components,
+    if everything went well...
+
+
+Further notes (JCornet 27.3.18 - ETH Zurich): 
+
+New version of the wrapper was updated to adapt the change from ppx 668 to ppx 681. 
+If by any chance a new version of Perple_X would outdate this wrapper, please procede as follow: 
+
+-The compilation of the ppx source files must be done with -fPIC to allow sharing libraries => change in the makefile of perplex the FFLAGS mode from -O3 to -fPIC  
+
+-Check the source perplex-parameters.h file from the new version and compare it with the perplex.h file of the wrapper. The parameters MUST HAVE the same values to avoid array size mismatch (see perplex.h file)
+
+-In the same perple.h file, check the common blocks declaration. The common blocks declaration in C language must match with the one in Fortran. (Ask James Connolly: james.connolly@erdw.ethz.ch for more infor about common blocks)
+
+-For the creation of a MEX file for Matlab: Matlab accept only one compiler version of gcc that is surely not the default compiler of your linux system. Check the following website to change the default compiler of your machine: https://ch.mathworks.com/help/matlab/matlab_external/changing-default-compiler.html
+
+- At the moment, the matlab version has a tiny problem in receiving characters from the C wrapper. I developped a short code to counteract the problem but I also currently work on a better wrapper version.The short matlab code is available upon request at julien.cornet@erdw.ethz.ch
+
+N.B: The current version works for ppx681, no need to recompile and compare anything. Just use it as it is for the C version. The matlab version (MEX file) also works with the short matlab code. 

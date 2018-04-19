@@ -1,15 +1,9 @@
-PrplxWrap v2014-02-21
+PrplxWrap v2013-07-04
 
 C wrapper for Perple_X v6.6.8
  - Perple_X by Jamie Connolly (see http://www.perplex.ethz.ch/)
  - This wrapper by Lars Kaislaniemi (lars.kaislaniemi@iki.fi)
 
-
-See individual files INSTRUCTIONS_* for different components:
- - C/PerpleX wrapper
-   - Example in dir distexamples/
- - GNU R/PerpleX wrapper
- - Matlab/PerpleX wrapper
 
 
 === Installation / using in your own code ===

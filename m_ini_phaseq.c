@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "math.h"
+#include <string.h>
 #include "mex.h"
 #include "perplex.h"
 
@@ -9,7 +10,7 @@
 static int ini_done = 0;
 static int ncomp;
 static double *wtphases, *cphases, *sysprop;
-static char *namephases;
+static char *namephases, *namephases2;
 void checkIniDone();
 
 EXTERN_C void mexFunction(int nlhs, mxArray *plhs[],
@@ -17,8 +18,8 @@ EXTERN_C void mexFunction(int nlhs, mxArray *plhs[],
 {
     char *inputfile;
     double action, P, T;
-    double *num_of_components, *comp, *ptr;
-    int nphases, dbgprint, ret, i, j, k;
+    double *num_of_components, *comp, *pind1, *pind2;
+    int nphases, dbgprint, ret, iphase, icomp;
 
     if (nrhs < 1) {
         mexErrMsgIdAndTxt("PrplxWrap:m_ini_phaseq:nrhs", "Need at least one argument: action");
@@ -39,15 +40,19 @@ EXTERN_C void mexFunction(int nlhs, mxArray *plhs[],
         nlhs = 1;
         ncomp = number_of_components();
         plhs[0] = mxCreateDoubleScalar((double)ncomp);
-        ini_done = 1;
+        ini_done=1;
 
         /* alloc the memory for later use (multiple times) when calling phaseq() */
         wtphases = (double *)mxMalloc(sizeof(double) * p_size_phases);
+        pind1 = (double *)mxMalloc(sizeof(double) * p_size_phases);
         cphases = (double *)mxMalloc(sizeof(double) * p_size_phases * p_size_components);
+        pind2 = (double *)mxMalloc(sizeof(double) * p_size_phases * p_size_components);
         sysprop = (double *)mxMalloc(sizeof(double) * p_size_sysprops);
         namephases = (char *)mxMalloc(sizeof(char) * p_size_phases * p_pname_len);
         mexMakeMemoryPersistent((void *)wtphases);
+        mexMakeMemoryPersistent((void *)pind1);
         mexMakeMemoryPersistent((void *)cphases);
+        mexMakeMemoryPersistent((void *)pind2);
         mexMakeMemoryPersistent((void *)sysprop);
         mexMakeMemoryPersistent((void *)namephases);
 
@@ -68,25 +73,28 @@ EXTERN_C void mexFunction(int nlhs, mxArray *plhs[],
         }
         /* int phaseq(double P, double T, int ncomp, double *comp, int *nphases,
                     double *wtphases, double *cphases, double *sysprop, char *namephases, int dbgprint) */
-        int output_array_sizes[2] = {1, ncomp};
-
         P = mxGetScalar(prhs[1]);
         T = mxGetScalar(prhs[2]);
         comp = mxGetPr(prhs[3]);
 
         ret = phaseq(P, T, ncomp, comp, &nphases, wtphases, cphases, sysprop, namephases, dbgprint);
-
-        nlhs = 2;
-        
+        nlhs = 4;
         plhs[0] = mxCreateDoubleScalar((double)nphases);
-        
-        plhs[1] = mxCreateDoubleMatrix(1, nphases, mxREAL);
-        ptr = mxGetPr(plhs[1]);
-        for (i = 0; i < nphases; i++) {
-            ptr[i] = wtphases[i];
-        }
+        plhs[1] = mxCreateDoubleMatrix(nphases,1,mxREAL);
+           pind1 = mxGetPr(plhs[1]);
+           for (iphase=0;iphase<nphases;iphase++)
+           {  pind1[iphase] = wtphases[iphase]; 
+           }
+        plhs[2] = mxCreateDoubleMatrix(nphases*ncomp,1,mxREAL);
+           pind2 = mxGetPr(plhs[2]);
+           for (iphase=0;iphase<nphases;iphase++)
+           {  for (icomp=0;icomp<ncomp;icomp++)
+              {  pind2[iphase*ncomp+icomp] = cphases[iphase*ncomp+icomp]; 
+              }
+           }
+        plhs[3] = mxCreateString(namephases);
+	plhs[4]= mxCreateDoubleScalar((double)ncomp);
     }
-
     return;
 }
 
@@ -95,5 +103,3 @@ void checkIniDone() {
     mexErrMsgIdAndTxt("PrplxWrap:m_ini_phaseq:initialization", "Do init first");
     return;  /* should never get here */
 }
-
-
